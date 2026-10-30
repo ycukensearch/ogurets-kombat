@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ОГУРЕЦ КОМБАТ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Segoe UI', 'Arial', system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(145deg, #1e4b1e, #0a2a0a);
+            padding: 12px;
+            margin: 0;
+            touch-action: manipulation;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 420px;
+            background: #2e5e2e;
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(255, 255, 200, 0.5);
+            padding: 20px 16px 24px;
+            border: 4px solid #a8c97a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: repeating-linear-gradient(90deg, #b1e06b, #b1e06b 12px, #8fb84c 12px, #8fb84c 24px);
+            border-radius: 48px 48px 0 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            margin-bottom: 16px;
+            padding: 0 6px;
+        }
+
+        .balance-box {
+            background: #1d3d1d;
+            border-radius: 60px;
+            padding: 10px 18px;
+            border: 2px solid #b6d98b;
+            box-shadow: inset 0 2px 6px #0a1f0a, 0 6px 0 #0a1f0a;
+        }
+
+        .balance-label {
+            font-size: 13px;
+            color: #d4f0b0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+            text-shadow: 0 1px 0 #0a1f0a;
+        }
+
+        .balance-value {
+            font-size: 34px;
+            font-weight: 900;
+            color: #f9ffd6;
+            text-shadow: 0 3px 0 #5b8c2e, 0 5px 8px black;
+            line-height: 1.1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .per-tap-box {
+            background: #305f30;
+            border-radius: 40px;
+            padding: 8px 16px;
+            border: 2px solid #c3e68b;
+            box-shadow: inset 0 2px 5px #173817, 0 4px 0 #0e2a0e;
+            text-align: center;
+        }
+
+        .per-tap-label {
+            font-size: 11px;
+            color: #c0e488;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .per-tap-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff9c4;
+            text-shadow: 0 2px 0 #3f6b1f;
+            line-height: 1.2;
+        }
+
+        /* Контейнер для огурца — теперь с SVG-тенью */
+        .cucumber-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 12px 0 14px;
+            min-height: 260px;
+            position: relative;
+        }
+
+        .cucumber {
+            width: 220px;
+            height: 260px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: idleBob 2.8s infinite ease-in-out;
+            will-change: transform;
+            transform-origin: center 70%;
+            filter: drop-shadow(0 22px 14px rgba(0, 0, 0, 0.55));
+            transition: transform 0.08s ease, filter 0.08s;
+        }
+
+        .cucumber:active {
+            transform: scale(0.94) !important;
+            filter: brightness(0.92) drop-shadow(0 12px 10px rgba(0, 0, 0, 0.5));
+        }
+
+        .cucumber svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            pointer-events: none;
+        }
+
+        @keyframes idleBob {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(0.8deg); }
+        }
+
+        .tap-hint {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #c2e694;
+            text-shadow: 0 2px 0 #1b3a0b;
+            margin: 6px 0 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .upgrade-section {
+            background: #1a3b1a;
+            border-radius: 30px;
+            padding: 14px 12px;
+            border: 2px solid #a3c87a;
+            box-shadow: inset 0 3px 8px #0b200b, 0 8px 0 #0a1f0a;
+            margin-top: 10px;
+        }
+
+        .upgrade-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-left: 6px;
+        }
+
+        .upgrade-title span {
+            font-size: 20px;
+            filter: drop-shadow(0 3px 2px black);
+        }
+
+        .upgrade-title h3 {
+            color: #e6ffb3;
+            font-size: 18px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 0 #284d0e;
+        }
+
+        .upgrade-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .upgrade-btn {
+            background: #3c6b2e;
+            border: none;
+            border-radius: 40px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 6px solid #1b3e0e;
+            transition: all 0.08s;
+            cursor: pointer;
+            color: #f2ffcf;
+            font-weight: 700;
+            box-shadow: 0 6px 0 #142e06, 0 8px 12px black;
+        }
+
+        .upgrade-btn:active {
+            transform: translateY(4px);
+            border-bottom-width: 2px;
+            box-shadow: 0 2px 0 #142e06, 0 6px 10px black;
+        }
+
+        .upgrade-btn.disabled {
+            opacity: 0.55;
+            filter: grayscale(0.5);
+            pointer-events: none;
+            transform: translateY(4px);
+            border-bottom-width: 2px;
+            box-shadow: 0 2px 0 #142e06;
+        }
+
+        .btn-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-emoji {
+            font-size: 28px;
+            line-height: 1;
+            filter: drop-shadow(0 3px 2px #0d1f05);
+        }
+
+        .btn-info {
+            text-align: left;
+        }
+
+        .btn-name {
+            font-size: 16px;
+            text-shadow: 0 2px 0 #1f3d0c;
+        }
+
+        .btn-desc {
+            font-size: 12px;
+            font-weight: 500;
+            color: #c8ec94;
+            text-shadow: 0 1px 0 #1f3d0c;
+        }
+
+        .btn-price {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffedb0;
+            text-shadow: 0 2px 0 #3b611b;
+            white-space: nowrap;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 14px;
+            padding: 0 4px;
+            font-size: 12px;
+            color: #b1d886;
+            font-weight: 600;
+            text-shadow: 0 1px 0 #0a1f0a;
+        }
+
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 28px;
+            font-weight: 900;
+            color: #f8ffb0;
+            text-shadow: 0 4px 0 #4b7a1e, 0 6px 10px black;
+            animation: floatUp 0.7s ease-out forwards;
+            z-index: 100;
+            white-space: nowrap;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
+            100% { opacity: 0; transform: translate(-50%, -180%) scale(1.4); }
+        }
+
+        .shake {
+            animation: shakeAnim 0.14s ease !important;
+        }
+
+        @keyframes shakeAnim {
+            0% { transform: rotate(0deg) scale(1); }
+            20% { transform: rotate(4deg) scale(0.97); }
+            60% { transform: rotate(-4deg) scale(0.98); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        .save-notification {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(30, 70, 20, 0.95);
+            color: #e6ffb3;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            border: 2px solid #b1e06b;
+            box-shadow: 0 6px 20px black;
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 200;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .save-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Анимация моргания */
+        .eye-blink {
+            animation: blink 0.15s ease;
+        }
+        @keyframes blink {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <div class="save-notification" id="saveNotification">💾 Сохранение загружено!</div>
+
+        <div class="header">
+            <div class="balance-box">
+                <div class="balance-label">🥒 ОГУРЧИКИ</div>
+                <div class="balance-value" id="balanceDisplay">0</div>
+            </div>
+            <div class="per-tap-box">
+                <div class="per-tap-label">ЗА КЛИК</div>
+                <div class="per-tap-value" id="perTapDisplay">1</div>
+            </div>
+        </div>
+
+        <div class="cucumber-area" id="cucumberArea">
+            <div class="cucumber" id="cucumber">
+                <!-- Реалистичный огурец в SVG -->
+                <svg viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Основной градиент тела огурца: тёмно-зелёный по краям, светлее в центре -->
+                        <radialGradient id="bodyGrad" cx="38%" cy="35%" r="75%" fx="35%" fy="30%">
+                            <stop offset="0%" stop-color="#a7d36b"/>
+                            <stop offset="25%" stop-color="#7cb342"/>
+                            <stop offset="55%" stop-color="#4e8a2a"/>
+                            <stop offset="80%" stop-color="#2d5a14"/>
+                            <stop offset="100%" stop-color="#1a3a08"/>
+                        </radialGradient>
+
+                        <!-- Боковой градиент для объёма (слева свет, справа тень) -->
+                        <linearGradient id="sideShade" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+                            <stop offset="30%" stop-color="#ffffff" stop-opacity="0.05"/>
+                            <stop offset="55%" stop-color="#000000" stop-opacity="0"/>
+                            <stop offset="85%" stop-color="#000000" stop-opacity="0.25"/>
+                            <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+                        </linearGradient>
+
+                        <!-- Вертикальный градиент для усиления объёма сверху вниз -->
+                        <linearGradient id="verticalShade" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+                            <stop offset="20%" stop-color="#ffffff" stop-opacity="0"/>
+                            <stop offset="80%" stop-color="#000000" stop-opacity="0"/>
+                            <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
+                        </linearGradient>
+
+                        <!-- Блик -->
+                        <radialGradient id="highlight" cx="30%" cy="25%" r="30%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.75"/>
+                            <stop offset="60%" stop-color="#ffffff" stop-opacity="0.15"/>
+                            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                        </radialGradient>
+
+                        <!-- Пупырышек -->
+                        <radialGradient id="bumpGrad" cx="35%" cy="30%" r="70%">
+                            <stop offset="0%" stop-color="#d4f0a0"/>
+                            <stop offset="50%" stop-color="#8fc45a"/>
+                            <stop offset="100%" stop-color="#3d6b1e"/>
+                        </radialGradient>
+
+                        <!-- Тень под огурцом -->
+                        <radialGradient id="floorShadow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#000000" stop-opacity="0.45"/>
+                            <stop offset="70%" stop-color="#000000" stop-opacity="0.15"/>
+                            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+                        </radialGradient>
+
+                        <!-- Глаз градиент -->
+                        <radialGradient id="eyeGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="80%" stop-color="#f0f0e8"/>
+                            <stop offset="100%" stop-color="#d8d8c8"/>
+                        </radialGradient>
+
+                        <!-- Тень на теле для текстуры -->
+                        <filter id="bodyTexture" x="-10%" y="-10%" width="120%" height="120%">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" seed="3" result="noise"/>
+                            <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0.1
+                                                                             0 0 0 0 0.2
+                                                                             0 0 0 0 0.05
+                                                                             0 0 0 0.35 0" result="coloredNoise"/>
+                            <feComposite in="coloredNoise" in2="SourceGraphic" operator="in" result="texture"/>
+                            <feBlend in="texture" in2="SourceGraphic" mode="multiply"/>
+                        </filter>
+                    </defs>
+
+                    <!-- Тень на полу -->
+                    <ellipse cx="110" cy="245" rx="78" ry="14" fill="url(#floorShadow)"/>
+
+                    <!-- Тело огурца: форма изогнутой колбаски -->
+                    <g filter="url(#bodyTexture)">
+                        <path d="M 110 18
+                                 C 145 18, 175 45, 180 85
+                                 C 185 125, 178 165, 168 200
+                                 C 162 225, 148 242, 128 245
+                                 C 115 247, 100 243, 88 235
+                                 C 68 222, 48 195, 40 160
+                                 C 32 125, 32 85, 45 55
+                                 C 58 28, 85 18, 110 18 Z"
+                              fill="url(#bodyGrad)"
+                              stroke="#1a3a08"
+                              stroke-width="2"/>
+                    </g>
+
+                    <!-- Объём: боковая тень -->
+                    <path d="M 110 18
+                             C 145 18, 175 45, 180 85
+                             C 185 125, 178 165, 168 200
+                             C 162 225, 148 242, 128 245
+                             C 115 247, 100 243, 88 235
+                             C 68 222, 48 195, 40 160
+                             C 32 125, 32 85, 45 55
+                             C 58 28, 85 18, 110 18 Z"
+                          fill="url(#sideShade)"/>
+
+                    <!-- Объём: вертикальная тень -->
+                    <path d="M 110 18
+                             C 145 18, 175 45, 180 85
+                             C 185 125, 178 165, 168 200
+                             C 162 225, 148 242, 128 245
+                             C 115 247, 100 243, 88 235
+                             C 68 222, 48 195, 40 160
+                             C 32 125, 32 85, 45 55
+                             C 58 28, 85 18, 110 18 Z"
+                          fill="url(#verticalShade)"/>
+
+                    <!-- Пупырышки (много мелких точек по поверхности) -->
+                    <g id="bumps">
+                        <!-- Ряд 1 -->
+                        <ellipse cx="80" cy="60" rx="6" ry="5" fill="url(#bumpGrad)" opacity="0.9"/>
+                        <ellipse cx="120" cy="55" rx="5" ry="4.5" fill="url(#bumpGrad)" opacity="0.85"/>
+                        <ellipse cx="150" cy="75" rx="6" ry="5" fill="url(#bumpGrad)" opacity="0.9"/>
+                        <ellipse cx="95" cy="90" rx="5.5" ry="4.5" fill="url(#bumpGrad)" opacity="0.8"/>
+                        <ellipse cx="140" cy="100" rx="5" ry="4" fill="url(#bumpGrad)" opacity="0.85"/>
+                        <!-- Ряд 2 -->
+                        <ellipse cx="65" cy="110" rx="5.5" ry="4.5" fill="url(#bumpGrad)" opacity="0.85"/>
+                        <ellipse cx="110" cy="125" rx="6" ry="5" fill="url(#bumpGrad)" opacity="0.9"/>
+                        <ellipse cx="155" cy="130" rx="5" ry="4" fill="url(#bumpGrad)" opacity="0.8"/>
+                        <ellipse cx="75" cy="150" rx="5" ry="4" fill="url(#bumpGrad)" opacity="0.85"/>
+                        <ellipse cx="130" cy="155" rx="5.5" ry="4.5" fill="url(#bumpGrad)" opacity="0.85"/>
+                        <!-- Ряд 3 -->
+                        <ellipse cx="95" cy="175" rx="6" ry="5" fill="url(#bumpGrad)" opacity="0.85"/>
+                        <ellipse cx="150" cy="180" rx="4.5" ry="3.5" fill="url(#bumpGrad)" opacity="0.8"/>
+                        <ellipse cx="70" cy="195" rx="5" ry="4" fill="url(#bumpGrad)" opacity="0.8"/>
+                        <ellipse cx="115" cy="200" rx="5.5" ry="4.5" fill="url(#bumpGrad)" opacity="0.85"/>
+                        <ellipse cx="85" cy="220" rx="4.5" ry="3.5" fill="url(#bumpGrad)" opacity="0.8"/>
+                        <!-- Ряд 4 (низ) -->
+                        <ellipse cx="130" cy="225" rx="5" ry="4" fill="url(#bumpGrad)" opacity="0.8"/>
+                        <ellipse cx="105" cy="235" rx="4" ry="3" fill="url(#bumpGrad)" opacity="0.75"/>
+                        <ellipse cx="145" cy="210" rx="4" ry="3.5" fill="url(#bumpGrad)" opacity="0.75"/>
+                        <!-- Мелкие дополнительные -->
+                        <ellipse cx="55" cy="135" rx="4" ry="3" fill="url(#bumpGrad)" opacity="0.75"/>
+                        <ellipse cx="165" cy="110" rx="4" ry="3" fill="url(#bumpGrad)" opacity="0.7"/>
+                        <ellipse cx="50" cy="80" rx="4" ry="3" fill="url(#bumpGrad)" opacity="0.7"/>
+                        <ellipse cx="160" cy="160" rx="4" ry="3" fill="url(#bumpGrad)" opacity="0.7"/>
+                    </g>
+
+                    <!-- Блик на теле (сверху-слева) -->
+                    <path d="M 75 50
+                             C 95 35, 125 38, 140 55
+                             C 130 50, 110 48, 95 55
+                             C 85 60, 78 65, 75 50 Z"
+                          fill="url(#highlight)" opacity="0.85"/>
+
+                    <!-- Второй блик, поменьше -->
+                    <ellipse cx="85" cy="100" rx="18" ry="28" fill="url(#highlight)" opacity="0.35" transform="rotate(-15 85 100)"/>
+
+                    <!-- Хвостик (плодоножка) сверху -->
+                    <g>
+                        <path d="M 100 20 C 102 12, 108 8, 112 14 C 114 18, 112 22, 108 23 C 104 24, 101 23, 100 20 Z"
+                              fill="#3d6b1e" stroke="#1a3a08" stroke-width="1"/>
+                        <path d="M 108 14 C 110 10, 114 8, 116 12 C 117 16, 114 19, 111 18"
+                              fill="#5a8a2a" opacity="0.8"/>
+                    </g>
+
+                    <!-- Глаза -->
+                    <g id="eyesGroup">
+                        <!-- Левый глаз -->
+                        <g class="eye-group" id="leftEyeGroup">
+                            <ellipse cx="85" cy="120" rx="16" ry="18" fill="url(#eyeGrad)" stroke="#1a3a08" stroke-width="2"/>
+                            <!-- Зрачок -->
+                            <circle id="pupilLeft" cx="85" cy="122" r="7" fill="#0a0a0a"/>
+                            <!-- Блик в зрачке -->
+                            <circle cx="82" cy="119" r="2.5" fill="#ffffff" opacity="0.9"/>
+                        </g>
+                        <!-- Правый глаз -->
+                        <g class="eye-group" id="rightEyeGroup">
+                            <ellipse cx="135" cy="120" rx="16" ry="18" fill="url(#eyeGrad)" stroke="#1a3a08" stroke-width="2"/>
+                            <circle id="pupilRight" cx="135" cy="122" r="7" fill="#0a0a0a"/>
+                            <circle cx="132" cy="119" r="2.5" fill="#ffffff" opacity="0.9"/>
+                        </g>
+                    </g>
+
+                    <!-- Рот -->
+                    <path id="mouth" d="M 98 150 Q 110 165 122 150"
+                          fill="none" stroke="#2b0e0e" stroke-width="4" stroke-linecap="round"/>
+
+                    <!-- Румянец на щеках -->
+                    <ellipse cx="68" cy="145" rx="10" ry="6" fill="#e04a4a" opacity="0.25"/>
+                    <ellipse cx="152" cy="145" rx="10" ry="6" fill="#e04a4a" opacity="0.25"/>
+                </svg>
+            </div>
+        </div>
+        <div class="tap-hint">👆 ТЫКАЙ В ОГУРЕЦ 👆</div>
+
+        <div class="upgrade-section">
+            <div class="upgrade-title">
+                <span>🌿</span>
+                <h3>Улучшения</h3>
+            </div>
+            <div class="upgrade-buttons">
+                <button class="upgrade-btn" id="upgradeTapBtn">
+                    <div class="btn-left">
+                        <span class="btn-emoji">🖐️</span>
+                        <div class="btn-info">
+                            <div class="btn-name">Сила клика</div>
+                            <div class="btn-desc">+1 за клик</div>
+                        </div>
+                    </div>
+                    <div class="btn-price" id="upgradeTapPrice">50</div>
+                </button>
+                <button class="upgrade-btn" id="upgradeMultiBtn">
+                    <div class="btn-left">
+                        <span class="btn-emoji">💪</span>
+                        <div class="btn-info">
+                            <div class="btn-name">Мощный огурец</div>
+                            <div class="btn-desc">x2 за клик</div>
+                        </div>
+                    </div>
+                    <div class="btn-price" id="upgradeMultiPrice">300</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>🥒 ОГУРЕЦ КОМБАТ</span>
+            <span>v1.2</span>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const SAVE_KEY = 'cucumberCombatSave_v1';
+
+            const DEFAULT_STATE = {
+                balance: 0,
+                perTap: 1,
+                upgradeTapCost: 50,
+                multiUpgradeCost: 300,
+                tapUpgradeLevel: 0,
+                multiUpgradeBought: false
+            };
+
+            let balance = DEFAULT_STATE.balance;
+            let perTap = DEFAULT_STATE.perTap;
+            let upgradeTapCost = DEFAULT_STATE.upgradeTapCost;
+            let upgradeMultiCost = DEFAULT_STATE.multiUpgradeCost;
+            let tapUpgradeLevel = DEFAULT_STATE.tapUpgradeLevel;
+            let multiUpgradeBought = DEFAULT_STATE.multiUpgradeBought;
+
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            const perTapDisplay = document.getElementById('perTapDisplay');
+            const cucumber = document.getElementById('cucumber');
+            const cucumberArea = document.getElementById('cucumberArea');
+            const upgradeTapBtn = document.getElementById('upgradeTapBtn');
+            const upgradeMultiBtn = document.getElementById('upgradeMultiBtn');
+            const upgradeTapPrice = document.getElementById('upgradeTapPrice');
+            const upgradeMultiPrice = document.getElementById('upgradeMultiPrice');
+            const pupilLeft = document.getElementById('pupilLeft');
+            const pupilRight = document.getElementById('pupilRight');
+            const mouth = document.getElementById('mouth');
+            const gameContainer = document.getElementById('gameContainer');
+            const saveNotification = document.getElementById('saveNotification');
+            const leftEyeGroup = document.getElementById('leftEyeGroup');
+            const rightEyeGroup = document.getElementById('rightEyeGroup');
+
+            function saveGame() {
+                try {
+                    const state = {
+                        balance, perTap, upgradeTapCost,
+                        multiUpgradeCost: upgradeMultiCost,
+                        tapUpgradeLevel, multiUpgradeBought
+                    };
+                    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+                } catch (e) {
+                    console.warn('Не удалось сохранить игру:', e);
+                }
+            }
+
+            function loadGame() {
+                try {
+                    const raw = localStorage.getItem(SAVE_KEY);
+                    if (!raw) return false;
+                    const saved = JSON.parse(raw);
+                    if (typeof saved === 'object' && saved !== null) {
+                        balance = typeof saved.balance === 'number' ? saved.balance : DEFAULT_STATE.balance;
+                        perTap = typeof saved.perTap === 'number' ? saved.perTap : DEFAULT_STATE.perTap;
+                        upgradeTapCost = typeof saved.upgradeTapCost === 'number' ? saved.upgradeTapCost : DEFAULT_STATE.upgradeTapCost;
+                        upgradeMultiCost = typeof saved.multiUpgradeCost === 'number' ? saved.multiUpgradeCost : DEFAULT_STATE.multiUpgradeCost;
+                        tapUpgradeLevel = typeof saved.tapUpgradeLevel === 'number' ? saved.tapUpgradeLevel : DEFAULT_STATE.tapUpgradeLevel;
+                        multiUpgradeBought = typeof saved.multiUpgradeBought === 'boolean' ? saved.multiUpgradeBought : DEFAULT_STATE.multiUpgradeBought;
+                        if (typeof saved.perTap !== 'number' || saved.perTap < 1) {
+                            perTap = 1 + tapUpgradeLevel;
+                            if (multiUpgradeBought) perTap *= 2;
+                        }
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('Не удалось загрузить сохранение:', e);
+                }
+                return false;
+            }
+
+            function showSaveNotification() {
+                saveNotification.classList.add('show');
+                setTimeout(() => saveNotification.classList.remove('show'), 2000);
+            }
+
+            function updateUI() {
+                balanceDisplay.textContent = Math.floor(balance);
+                perTapDisplay.textContent = perTap;
+                upgradeTapPrice.textContent = upgradeTapCost;
+                upgradeMultiPrice.textContent = upgradeMultiCost;
+
+                if (balance < upgradeTapCost) {
+                    upgradeTapBtn.classList.add('disabled');
+                } else {
+                    upgradeTapBtn.classList.remove('disabled');
+                }
+
+                if (balance < upgradeMultiCost || multiUpgradeBought) {
+                    upgradeMultiBtn.classList.add('disabled');
+                } else {
+                    upgradeMultiBtn.classList.remove('disabled');
+                }
+
+                if (multiUpgradeBought) {
+                    upgradeMultiBtn.querySelector('.btn-desc').textContent = 'УЖЕ КУПЛЕНО';
+                } else {
+                    upgradeMultiBtn.querySelector('.btn-desc').textContent = 'x2 за клик';
+                }
+            }
+
+            function showClickEffect(x, y, amount) {
+                const effect = document.createElement('div');
+                effect.className = 'click-effect';
+                effect.textContent = '+' + amount;
+                effect.style.left = x + 'px';
+                effect.style.top = y + 'px';
+                gameContainer.appendChild(effect);
+                setTimeout(() => effect.remove(), 700);
+            }
+
+            // Реакция глаз и рта
+            function reactEyesAndMouth() {
+                const randX = (Math.random() - 0.5) * 8;
+                const randY = (Math.random() - 0.5) * 6;
+
+                pupilLeft.style.transform = `translate(${randX}px, ${randY}px)`;
+                pupilRight.style.transform = `translate(${randX}px, ${randY}px)`;
+
+                // Рот открывается (изменяем путь)
+                mouth.setAttribute('d', 'M 98 150 Q 110 172 122 150');
+                mouth.setAttribute('stroke-width', '5');
+
+                setTimeout(() => {
+                    mouth.setAttribute('d', 'M 98 150 Q 110 165 122 150');
+                    mouth.setAttribute('stroke-width', '4');
+                    pupilLeft.style.transform = 'translate(0,0)';
+                    pupilRight.style.transform = 'translate(0,0)';
+                }, 220);
+            }
+
+            // Моргание (случайное)
+            function blinkEyes() {
+                leftEyeGroup.classList.add('eye-blink');
+                rightEyeGroup.classList.add('eye-blink');
+                setTimeout(() => {
+                    leftEyeGroup.classList.remove('eye-blink');
+                    rightEyeGroup.classList.remove('eye-blink');
+                }, 160);
+            }
+
+            // Запускаем случайное моргание
+            setInterval(() => {
+                if (Math.random() > 0.5) blinkEyes();
+            }, 3000);
+
+            function onCucumberClick(e) {
+                e.preventDefault();
+                balance += perTap;
+
+                cucumber.classList.add('shake');
+                setTimeout(() => cucumber.classList.remove('shake'), 140);
+
+                reactEyesAndMouth();
+
+                const containerRect = gameContainer.getBoundingClientRect();
+                let clickX, clickY;
+
+                if (e.touches) {
+                    if (e.touches.length > 0) {
+                        clickX = e.touches[0].clientX - containerRect.left;
+                        clickY = e.touches[0].clientY - containerRect.top;
+                    } else {
+                        const rect = cucumberArea.getBoundingClientRect();
+                        clickX = rect.left + rect.width/2 - containerRect.left;
+                        clickY = rect.top + rect.height/2 - containerRect.top;
+                    }
+                } else {
+                    clickX = e.clientX - containerRect.left;
+                    clickY = e.clientY - containerRect.top;
+                }
+
+                showClickEffect(clickX, clickY, perTap);
+                updateUI();
+                saveGame();
+            }
+
+            function buyTapUpgrade() {
+                if (balance >= upgradeTapCost) {
+                    balance -= upgradeTapCost;
+                    perTap += 1;
+                    tapUpgradeLevel++;
+                    upgradeTapCost = Math.floor(upgradeTapCost * 1.8);
+                    updateUI();
+                    flashUpgrade(upgradeTapBtn);
+                    saveGame();
+                }
+            }
+
+            function buyMultiUpgrade() {
+                if (balance >= upgradeMultiCost && !multiUpgradeBought) {
+                    balance -= upgradeMultiCost;
+                    perTap *= 2;
+                    multiUpgradeBought = true;
+                    updateUI();
+                    flashUpgrade(upgradeMultiBtn);
+                    saveGame();
+                }
+            }
+
+            function flashUpgrade(btn) {
+                btn.style.transform = 'scale(1.02)';
+                btn.style.filter = 'brightness(1.3)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                    btn.style.filter = '';
+                }, 150);
+            }
+
+            window.resetCucumberGame = function() {
+                localStorage.removeItem(SAVE_KEY);
+                location.reload();
+            };
+
+            function init() {
+                const loaded = loadGame();
+
+                cucumber.addEventListener('click', onCucumberClick);
+                cucumber.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    onCucumberClick(e);
+                }, { passive: false });
+
+                upgradeTapBtn.addEventListener('click', buyTapUpgrade);
+                upgradeMultiBtn.addEventListener('click', buyMultiUpgrade);
+
+                cucumber.addEventListener('contextmenu', (e) => e.preventDefault());
+
+                updateUI();
+
+                if (loaded) {
+                    showSaveNotification();
+                }
+
+                window.addEventListener('beforeunload', saveGame);
+                document.addEventListener('visibilitychange', function() {
+                    if (document.visibilityState === 'hidden') {
+                        saveGame();
+                    }
+                });
+            }
+
+            window.addEventListener('load', init);
+        })();
+    </script>
+</body>
+  </html>
